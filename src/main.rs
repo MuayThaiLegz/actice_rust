@@ -1,35 +1,70 @@
-use std::fs::File;
-use std::io::BufReader;
-use std::io::prelude::*;
-use regex::Regex;
-use clap::{App,Arg};
+#![allow(unused_variables)]
 
-fn main() {
-    let args = App::new("grep-lite")
-      .version("0.1")
-      .about("searches for patterns")
-      .arg(Arg::with_name("pattern")
-        .help("The pattern to search for")
-        .takes_value(true)
-        .required(true))
-      .arg(Arg::with_name("input")
-        .help("File to search")
-        .takes_value(true)
-        .required(true))
-      .get_matches();
+#[derive(Debug)]
 
-    let pattern = args.value_of("pattern").unwrap();
-    let re = Regex::new(pattern).unwrap();
+struct File {
+    name: String,
+    data: Vec<u8>,
+}
 
-    let input = args.value_of("input").unwrap();
-    let f = File::open(input).unwrap();
-    let reader = BufReader::new(f);
+impl File {
 
-    for line_ in reader.lines() {
-        let line = line_.unwrap();
-        match re.find(&line) {
-            Some(_) => println!("{}", line),
-            None => (),
+    fn new(name: &str) -> File {
+        File {
+            name: String::from(name),
+            data: Vec::new(),
         }
     }
+
+    fn new_with_data(
+        name: &str,
+        data: &Vec<u8>,
+        
+    ) -> File {
+        let mut f = File::new(name);
+        f.data = data.clone();
+        f
+    }
+
+    fn read(
+        self: &File, 
+        save_to: &mut Vec<u8>,
+
+    ) -> usize {
+
+        let mut tmp = self.data.clone();
+        let read_length = tmp.len();
+        save_to.reserve(read_length);
+        save_to.append(&mut tmp);
+        read_length
+    }
+}
+
+fn open(f: &mut File) -> bool {
+    true
+}
+
+
+fn close(f: &mut File) -> bool {
+    true
+}
+
+fn main() {
+    let f3_data: Vec<u8> = vec![
+        114, 117, 115, 116, 33
+    ];
+    let mut f3 = File::new_with_data("2.txt", &f3_data);
+
+    let mut buffer: Vec<u8> = vec![];
+
+    open(&mut f3);
+    let f3_length = f3.read(&mut buffer);
+    close(&mut f3);
+
+    let text = String::from_utf8_lossy(&buffer);
+
+    println!("{:?}", f3);
+    println!("{} is {} bytes long", &f3.name, f3_length);
+    println!("{}", text);
+
 }
